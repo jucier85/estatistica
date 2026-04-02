@@ -6,6 +6,7 @@ Processamento de dados de produtividade policial com IA (Gemini).
 import os
 import uuid
 import tempfile
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -91,11 +92,19 @@ async def upload_and_analyze(
             except PermissionError:
                 pass  # Windows: arquivo pode estar travado, será limpo pelo SO
 
-    analysis = await gemini.analyze_police_data(
-        raw_data=raw_data,
-        unit_name=unit_name,
-        period=period,
-    )
+    logging.info(f"Arquivo processado: {file.filename} - Enviando ao Gemini...")
+
+    try:
+        analysis = await gemini.analyze_police_data(
+            raw_data=raw_data,
+            unit_name=unit_name,
+            period=period,
+        )
+    except Exception as e:
+        logging.error(f"Erro na análise Gemini: {e}")
+        raise HTTPException(status_code=500, detail=f"Erro na análise com IA: {e}")
+
+    logging.info("Análise concluída com sucesso.")
 
     return AnalysisResponse(
         id=str(uuid.uuid4()),

@@ -4,6 +4,7 @@ Processa dados brutos policiais e gera análises estruturadas.
 Usa o SDK google-genai (atual) com modelo gemini-2.5-flash.
 """
 
+import asyncio
 import json
 import os
 
@@ -63,7 +64,8 @@ DADOS PARA ANÁLISE:
 
 Responda APENAS com o JSON válido, sem markdown ou texto adicional."""
 
-        response = self.client.models.generate_content(
+        response = await asyncio.to_thread(
+            self.client.models.generate_content,
             model=self.model,
             contents=prompt,
         )
