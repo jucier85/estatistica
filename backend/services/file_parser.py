@@ -55,19 +55,19 @@ def _parse_pdf(file_path: str) -> dict:
 
 def _parse_excel(file_path: str) -> dict:
     """Extrai dados de planilhas XLS/XLSX via pandas."""
-    xls = pd.ExcelFile(file_path)
     sheets = {}
 
-    for sheet_name in xls.sheet_names:
-        df = pd.read_excel(xls, sheet_name=sheet_name)
-        df = df.dropna(how="all")
-        df.columns = [str(c).strip() for c in df.columns]
+    with pd.ExcelFile(file_path) as xls:
+        for sheet_name in xls.sheet_names:
+            df = pd.read_excel(xls, sheet_name=sheet_name)
+            df = df.dropna(how="all")
+            df.columns = [str(c).strip() for c in df.columns]
 
-        sheets[sheet_name] = {
-            "headers": df.columns.tolist(),
-            "rows": df.fillna("").to_dict(orient="records"),
-            "row_count": len(df),
-        }
+            sheets[sheet_name] = {
+                "headers": df.columns.tolist(),
+                "rows": df.fillna("").to_dict(orient="records"),
+                "row_count": len(df),
+            }
 
     return {
         "source": "excel",

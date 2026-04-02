@@ -75,6 +75,7 @@ async def upload_and_analyze(
             detail=f"Arquivo excede o limite de {MAX_UPLOAD_SIZE // (1024*1024)}MB.",
         )
 
+    tmp_path = None
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
             tmp.write(contents)
@@ -84,8 +85,11 @@ async def upload_and_analyze(
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Erro ao processar arquivo: {e}")
     finally:
-        if os.path.exists(tmp_path):
-            os.unlink(tmp_path)
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except PermissionError:
+                pass  # Windows: arquivo pode estar travado, será limpo pelo SO
 
     analysis = await gemini.analyze_police_data(
         raw_data=raw_data,
