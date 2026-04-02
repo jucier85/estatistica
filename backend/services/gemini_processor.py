@@ -1,22 +1,23 @@
 """
 Serviço de integração com Google Gemini API.
 Processa dados brutos policiais e gera análises estruturadas.
+Usa o SDK google-genai (atual) com modelo gemini-2.5-flash.
 """
 
 import json
 import os
 
-import google.generativeai as genai
+from google import genai
 from models.schemas import AnalysisResult, ChartData, MetricData, RankingEntry, DashboardData
 
 
 class GeminiProcessor:
     def __init__(self):
         api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
+        if not api_key or api_key == "your_gemini_api_key_here":
             raise ValueError("GEMINI_API_KEY não configurada.")
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel("gemini-2.0-flash")
+        self.client = genai.Client(api_key=api_key)
+        self.model = "gemini-2.5-flash"
 
     async def analyze_police_data(
         self,
@@ -62,7 +63,10 @@ DADOS PARA ANÁLISE:
 
 Responda APENAS com o JSON válido, sem markdown ou texto adicional."""
 
-        response = self.model.generate_content(prompt)
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=prompt,
+        )
         return self._parse_analysis_response(response.text)
 
     async def generate_custom_dashboard(
