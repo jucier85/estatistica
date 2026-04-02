@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Estatística Policial
+Comment=Dashboard de Produtividade Policial com IA
+Exec=bash -c 'cd "$(dirname "%k")" && python3 launcher.py'
+Terminal=true
+Type=Application
+Icon=utilities-system-monitor
+Categories=Office;
